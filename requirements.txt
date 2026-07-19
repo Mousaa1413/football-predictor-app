@@ -1,0 +1,8 @@
+# CLI / core (التنبؤ الحالي لا يحتاج scikit-learn)
+pandas>=2.0.0
+numpy>=1.24.0
+requests>=2.31.0
+
+# اختياري لاحقًا إن أضفت نموذج ML:
+# scikit-learn>=1.3.0
+# joblib>=1.3.0

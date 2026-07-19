@@ -1,0 +1,73 @@
+# ---- Python cache ----
+__pycache__/
+*/__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# ---- Virtual environments ----
+venv/
+.venv/
+env/
+vibe-env/
+ENV/
+
+# ---- Secrets / local env ----
+.env
+.env.*
+!.env.example
+
+# ---- Local data (قد تكون كبيرة / متغيرة) ----
+data/*.db
+data/**/*.db
+matches.db
+**/matches.db
+data/*.csv
+# أبقِ مجلد data في git
+!data/.gitkeep
+
+# ---- ML artifacts ----
+*.joblib
+models/*
+!models/.gitkeep
+
+# ---- Buildozer / Android build temp ----
+.buildozer/
+buildozer/
+bin/
+artifacts/
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+*.jks
+*.keystore
+local.properties
+.gradle/
+captures/
+
+# ---- Python packaging / test temp ----
+build/
+dist/
+*.egg
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+*.log
+
+# ---- IDE / OS ----
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
