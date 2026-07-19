@@ -24,7 +24,7 @@ source.include_patterns = src/*.py,data/*.csv,data/*.db
 
 # استبعاد ما لا يلزم داخل الحزمة
 # ملاحظة: لا تستبعد main.py — هو نقطة دخول Android (يُجهَّز من app.py في الـ workflow)
-source.exclude_dirs = tests,bin,venv,.venv,env,.git,.github,.buildozer,__pycache__,models,.idea,.vscode,p4a-recipes
+source.exclude_dirs = tests,bin,venv,.venv,env,.git,.github,.buildozer,__pycache__,models,.idea,.vscode,p4a-recipes,python-for-android,scripts
 source.exclude_patterns = *.pyc,*~,*.apk,*.aab,*.jks,.env,.env.*,*.md,fetch_data.py,predict.py,mobile_app.py,requirements*.txt,main_cli.py
 
 # ---- الاعتمادات (python-for-android recipes / pip) ----
@@ -68,8 +68,11 @@ android.logcat_filters = *:S python:D
 android.release_artifact = apk
 android.debug_artifact = apk
 
-# فرع p4a — master أحدث الوصفات (numpy/pandas/kivy)
-p4a.branch = master
+# p4a من مجلد محلي مُرقَّع (انظر scripts/patch_p4a_venv_pip.py والـ workflow).
+# السبب: run_pymodules_install يعيد `python -m venv venv` لكل ABI فيخلط
+# ملفات pip (ensurepip 24 + pip 26) → ImportError: RequirementInformation.
+# لا نستخدم p4a.branch هنا حتى لا يعيد buildozer checkout ويمسح الترقيع.
+p4a.source_dir = %(source.dir)s/python-for-android
 p4a.bootstrap = sdl2
 # وصفات محلية:
 #   numpy — patch لـ #include <unordered_map> (NDK libc++)

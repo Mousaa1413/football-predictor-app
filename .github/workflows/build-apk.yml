@@ -82,10 +82,29 @@ jobs:
           cp -f app.py main.py
           head -n 5 main.py
 
+      # p4a محلي + ترقيع venv/pip (فشل ABI الثاني: RequirementInformation)
+      - name: Prepare patched python-for-android
+        run: |
+          set -euo pipefail
+          P4A_DIR="python-for-android"
+          P4A_BRANCH="master"
+          if [ ! -d "${P4A_DIR}/.git" ]; then
+            git clone --depth 1 --branch "${P4A_BRANCH}" \
+              https://github.com/kivy/python-for-android.git "${P4A_DIR}"
+          else
+            git -C "${P4A_DIR}" fetch --depth 1 origin "${P4A_BRANCH}"
+            git -C "${P4A_DIR}" checkout -f "FETCH_HEAD"
+          fi
+          python scripts/patch_p4a_venv_pip.py "${P4A_DIR}"
+          # تأكيد أن buildozer.spec يشير للمجلد المرقّع
+          grep -q 'p4a.source_dir' buildozer.spec
+
       # 5. buildozer android debug
       - name: Build APK
         run: |
           set -euo pipefail
+          # أعد الترقيع مباشرة قبل البناء (حماية من أي reset)
+          python scripts/patch_p4a_venv_pip.py python-for-android
           buildozer -v android debug
 
       # 6. Upload APK artifact

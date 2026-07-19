@@ -34,6 +34,8 @@ models/*
 # ---- Buildozer / Android build temp ----
 .buildozer/
 buildozer/
+# p4a يُستنسخ ويُرقَّع في CI (scripts/patch_p4a_venv_pip.py)
+python-for-android/
 bin/
 artifacts/
 *.apk
