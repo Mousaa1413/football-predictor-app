@@ -1,0 +1,1143 @@
+#:import dp kivy.metrics.dp
+#:import C_BG theme.C_BG
+#:import C_BG_MID theme.C_BG_MID
+#:import C_BG_TOP theme.C_BG_TOP
+#:import C_SURFACE theme.C_SURFACE
+#:import C_SURFACE_SOLID theme.C_SURFACE_SOLID
+#:import C_CARD theme.C_CARD
+#:import C_CARD_SOLID theme.C_CARD_SOLID
+#:import C_CARD_ALT theme.C_CARD_ALT
+#:import C_ELEVATED theme.C_ELEVATED
+#:import C_BORDER theme.C_BORDER
+#:import C_BORDER_SOFT theme.C_BORDER_SOFT
+#:import C_ACCENT theme.C_ACCENT
+#:import C_ACCENT_DIM theme.C_ACCENT_DIM
+#:import C_ACCENT_SOFT theme.C_ACCENT_SOFT
+#:import C_GLOW_TEAL theme.C_GLOW_TEAL
+#:import C_GLOW_BLUE theme.C_GLOW_BLUE
+#:import C_WIN theme.C_WIN
+#:import C_DRAW theme.C_DRAW
+#:import C_LOSS theme.C_LOSS
+#:import C_HOME theme.C_HOME
+#:import C_AWAY theme.C_AWAY
+#:import C_TEXT theme.C_TEXT
+#:import C_MUTED theme.C_MUTED
+#:import C_HINT theme.C_HINT
+#:import C_DANGER theme.C_DANGER
+#:import C_OK theme.C_OK
+#:import C_SHADOW theme.C_SHADOW
+
+# ========== primitives ==========
+
+<TeamAvatar>:
+    size_hint: None, None
+    size: self.avatar_size, self.avatar_size
+    canvas.before:
+        # حلقة خارجية خفيفة
+        Color:
+            rgba: self.ring_color
+        Ellipse:
+            pos: self.x - dp(2), self.y - dp(2)
+            size: self.width + dp(4), self.height + dp(4)
+        Color:
+            rgba: self.bg_color
+        Ellipse:
+            pos: self.pos
+            size: self.size
+    Label:
+        text: root.initials
+        bold: True
+        color: 1, 1, 1, 1
+        font_size: root.avatar_size * 0.34
+        size: root.size
+        pos: root.pos
+        halign: "center"
+        valign: "middle"
+        text_size: self.size
+
+<Card@BoxLayout>:
+    orientation: "vertical"
+    padding: dp(20)
+    spacing: dp(14)
+    size_hint_y: None
+    height: self.minimum_height
+    # بطاقة بحواف دائرية واضحة + ظل خفيف
+    canvas.before:
+        Color:
+            rgba: C_SHADOW
+        RoundedRectangle:
+            pos: self.x + dp(2), self.y - dp(4)
+            size: self.width - dp(4), self.height
+            radius: [dp(22),]
+        Color:
+            rgba: C_CARD_SOLID
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(20),]
+        # لمسة علوية أفتح داخل القوس الدائري
+        Color:
+            rgba: 1, 1, 1, 0.04
+        RoundedRectangle:
+            pos: self.x + dp(2), self.top - dp(24)
+            size: self.width - dp(4), dp(22)
+            radius: [dp(18), dp(18), 0, 0]
+        Color:
+            rgba: C_BORDER_SOFT
+        Line:
+            rounded_rectangle: (self.x, self.y, self.width, self.height, dp(20))
+            width: 1.1
+
+<SectionTitle@Label>:
+    size_hint_y: None
+    height: dp(24)
+    font_size: "13sp"
+    bold: True
+    color: C_MUTED
+    halign: "left"
+    valign: "middle"
+    text_size: self.size
+    opacity: 0.95
+
+<FieldLabel@Label>:
+    size_hint_y: None
+    height: dp(22)
+    font_size: "13sp"
+    color: C_MUTED
+    halign: "left"
+    valign: "middle"
+    text_size: self.size
+
+<MTextInput@TextInput>:
+    multiline: False
+    write_tab: False
+    size_hint_y: None
+    height: dp(54)
+    font_size: "16sp"
+    padding: [dp(16), dp(15), dp(16), dp(15)]
+    foreground_color: C_TEXT
+    cursor_color: C_ACCENT
+    hint_text_color: C_HINT
+    background_normal: ""
+    background_active: ""
+    background_color: 0, 0, 0, 0
+    canvas.before:
+        Color:
+            rgba: C_CARD_ALT
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(16),]
+        Color:
+            rgba: (C_ACCENT if self.focus else C_BORDER_SOFT)
+        Line:
+            rounded_rectangle: (self.x, self.y, self.width, self.height, dp(16))
+            width: 1.15
+
+<TeamSpinner>:
+    size_hint_y: None
+    height: dp(54)
+    font_size: "15sp"
+    color: C_TEXT
+    disabled_color: C_HINT
+    background_normal: ""
+    background_down: ""
+    background_disabled_normal: ""
+    background_color: 0, 0, 0, 0
+    option_cls: "TeamSpinnerOption"
+    sync_height: True
+    canvas.before:
+        Color:
+            rgba: C_CARD_ALT
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(16),]
+        Color:
+            rgba: C_BORDER_SOFT
+        Line:
+            rounded_rectangle: (self.x, self.y, self.width, self.height, dp(16))
+            width: 1.15
+
+<TeamSpinnerOption>:
+    size_hint_y: None
+    height: dp(52)
+    font_size: "15sp"
+    color: C_TEXT
+    background_normal: ""
+    background_down: ""
+    background_color: 0, 0, 0, 0
+    canvas.before:
+        Color:
+            rgba: C_SURFACE_SOLID if self.state != "down" else C_CARD_ALT
+        RoundedRectangle:
+            pos: self.x + dp(6), self.y + dp(3)
+            size: self.width - dp(12), self.height - dp(6)
+            radius: [dp(12),]
+
+<PrimaryButton>:
+    size_hint_y: None
+    height: dp(56)
+    canvas.before:
+        Color:
+            rgba: C_SHADOW
+        RoundedRectangle:
+            pos: self.x + dp(1), self.y - dp(3)
+            size: self.width - dp(2), self.height
+            radius: [dp(18),]
+        Color:
+            rgba: (C_ACCENT_DIM if self.disabled else (C_ACCENT if self.state != "down" else C_ACCENT_DIM))
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(16),]
+    Label:
+        text: root.text
+        bold: True
+        font_size: "17sp"
+        color: (0.04, 0.12, 0.09, 1) if not root.disabled else C_MUTED
+
+# زر التوقع البارز — لون مميز + وهج + ضغط واضح
+<PredictButton>:
+    size_hint_y: None
+    height: dp(60)
+    opacity: 1 if not root.disabled else 0.55
+    canvas.before:
+        # وهج خارجي
+        Color:
+            rgba: (0.12, 0.90, 0.58, 0.22) if (not root.disabled and root.state != "down") else (0, 0, 0, 0)
+        RoundedRectangle:
+            pos: self.x - dp(2), self.y - dp(2)
+            size: self.width + dp(4), self.height + dp(4)
+            radius: [dp(20),]
+        # ظل
+        Color:
+            rgba: (0.05, 0.35, 0.22, 0.55) if root.state != "down" else (0.05, 0.35, 0.22, 0.25)
+        RoundedRectangle:
+            pos: self.x + dp(2), self.y - (dp(5) if root.state != "down" else dp(1))
+            size: self.width - dp(4), self.height
+            radius: [dp(18),]
+        # جسم الزر (أفتح idle / أغمق pressed)
+        Color:
+            rgba: (
+                (0.08, 0.38, 0.28, 1) if root.disabled else (
+                    (0.10, 0.62, 0.44, 1) if root.state == "down" else (0.14, 0.88, 0.58, 1)
+                )
+            )
+        RoundedRectangle:
+            pos: self.x, self.y + (dp(1) if root.state == "down" else 0)
+            size: self.width, self.height - (dp(1) if root.state == "down" else 0)
+            radius: [dp(18),]
+        # لمعة علوية
+        Color:
+            rgba: (1, 1, 1, 0.18) if root.state != "down" else (1, 1, 1, 0.06)
+        RoundedRectangle:
+            pos: self.x + dp(3), self.top - dp(22) - (dp(1) if root.state == "down" else 0)
+            size: self.width - dp(6), dp(18)
+            radius: [dp(14), dp(14), 0, 0]
+        # إطار
+        Color:
+            rgba: (0.55, 1.0, 0.82, 0.45) if root.state != "down" else (0.30, 0.70, 0.52, 0.35)
+        Line:
+            rounded_rectangle: (self.x, self.y + (dp(1) if root.state == "down" else 0), self.width, self.height - (dp(1) if root.state == "down" else 0), dp(18))
+            width: 1.2
+    Label:
+        id: btn_label
+        text: root.text
+        bold: True
+        font_size: "18sp"
+        color: (0.03, 0.14, 0.10, 1) if not root.disabled else (0.55, 0.60, 0.58, 1)
+        halign: "center"
+        valign: "middle"
+
+<GhostButton>:
+    size_hint_y: None
+    height: dp(44)
+    canvas.before:
+        Color:
+            rgba: C_CARD_ALT if self.state != "down" else C_ELEVATED
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(14),]
+        Color:
+            rgba: C_BORDER_SOFT
+        Line:
+            rounded_rectangle: (self.x, self.y, self.width, self.height, dp(14))
+            width: 1
+    Label:
+        text: root.text
+        font_size: "14sp"
+        color: C_TEXT
+
+<NavItem>:
+    size_hint_x: 1
+    orientation: "vertical"
+    padding: dp(2), dp(8)
+    spacing: dp(3)
+    canvas.before:
+        Color:
+            rgba: C_ACCENT_SOFT if root.active else (0, 0, 0, 0)
+        RoundedRectangle:
+            pos: self.x + dp(8), self.y + dp(6)
+            size: self.width - dp(16), self.height - dp(10)
+            radius: [dp(16),]
+    Label:
+        text: root.icon
+        size_hint_y: None
+        height: dp(22)
+        font_size: "16sp"
+        color: C_ACCENT if root.active else C_MUTED
+        bold: True
+        halign: "center"
+        text_size: self.size
+    Label:
+        text: root.label
+        size_hint_y: None
+        height: dp(16)
+        font_size: "12sp"
+        bold: root.active
+        color: C_ACCENT if root.active else C_MUTED
+        halign: "center"
+        text_size: self.size
+
+<ProbBar>:
+    orientation: "vertical"
+    size_hint_y: None
+    height: dp(62)
+    padding: [dp(14), dp(12), dp(14), dp(12)]
+    spacing: dp(10)
+    canvas.before:
+        Color:
+            rgba: C_CARD_ALT
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(14),]
+        Color:
+            rgba: root.bar_color[0], root.bar_color[1], root.bar_color[2], 0.10
+        RoundedRectangle:
+            pos: self.x, self.y
+            size: dp(4), self.height
+            radius: [dp(14), 0, 0, dp(14)]
+
+    BoxLayout:
+        size_hint_y: None
+        height: dp(20)
+        spacing: dp(8)
+        Label:
+            text: root.side_label
+            font_size: "14sp"
+            bold: True
+            color: root.bar_color
+            halign: "left"
+            valign: "middle"
+            text_size: self.size
+        Label:
+            size_hint_x: None
+            width: dp(64)
+            text: root.pct_text
+            font_size: "17sp"
+            bold: True
+            color: C_TEXT
+            halign: "right"
+            valign: "middle"
+            text_size: self.size
+
+    # مسار شريط التقدم
+    Widget:
+        id: track
+        size_hint_y: None
+        height: dp(16)
+        canvas.before:
+            # خلفية المسار
+            Color:
+                rgba: 0.06, 0.07, 0.10, 1
+            RoundedRectangle:
+                pos: self.pos
+                size: self.size
+                radius: [dp(7),]
+            # تعبئة متحركة
+            Color:
+                rgba: root.bar_color[0], root.bar_color[1], root.bar_color[2], 0.30
+            RoundedRectangle:
+                pos: self.x, self.y
+                size: max(dp(0), self.width * root.display_value), self.height
+                radius: [dp(7),]
+            Color:
+                rgba: root.bar_color
+            RoundedRectangle:
+                pos: self.x, self.y + dp(2)
+                size: max(dp(0), self.width * root.display_value), self.height - dp(4)
+                radius: [dp(5),]
+
+<ProbStack>:
+    size_hint_y: None
+    height: dp(60)
+    orientation: "vertical"
+    padding: [dp(14), dp(12), dp(14), dp(12)]
+    spacing: dp(10)
+    canvas.before:
+        Color:
+            rgba: C_CARD_ALT
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(14),]
+
+    # شريط مكدّس واحد: فوز | تعادل | خسارة
+    Widget:
+        id: stack_track
+        size_hint_y: None
+        height: dp(16)
+
+    BoxLayout:
+        size_hint_y: None
+        height: dp(16)
+        spacing: dp(6)
+        Label:
+            text: "Win  " + root.home_txt
+            font_size: "12sp"
+            bold: True
+            color: C_WIN
+            halign: "left"
+            valign: "middle"
+            text_size: self.size
+        Label:
+            text: "Draw  " + root.draw_txt
+            font_size: "12sp"
+            bold: True
+            color: C_DRAW
+            halign: "center"
+            valign: "middle"
+            text_size: self.size
+        Label:
+            text: "Loss  " + root.away_txt
+            font_size: "12sp"
+            bold: True
+            color: C_LOSS
+            halign: "right"
+            valign: "middle"
+            text_size: self.size
+
+<VsPill@Label>:
+    size_hint: None, None
+    size: dp(46), dp(30)
+    text: "VS"
+    bold: True
+    font_size: "12sp"
+    color: C_ACCENT
+    halign: "center"
+    valign: "middle"
+    text_size: self.size
+    canvas.before:
+        Color:
+            rgba: C_ACCENT_SOFT
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(15),]
+        Color:
+            rgba: (0.18, 0.86, 0.62, 0.35)
+        Line:
+            rounded_rectangle: (self.x, self.y, self.width, self.height, dp(15))
+            width: 1
+
+<ResultBadge>:
+    size_hint_y: None
+    height: dp(42)
+    canvas.before:
+        Color:
+            rgba: root.soft_color
+        RoundedRectangle:
+            pos: self.x + dp(20), self.y
+            size: self.width - dp(40), self.height
+            radius: [dp(14),]
+        Color:
+            rgba: root.badge_color[0], root.badge_color[1], root.badge_color[2], 0.45
+        Line:
+            rounded_rectangle: (self.x + dp(20), self.y, self.width - dp(40), self.height, dp(14))
+            width: 1
+    Label:
+        text: root.text
+        bold: True
+        font_size: "18sp"
+        color: root.badge_color
+        halign: "center"
+        valign: "middle"
+
+# ========== shell ==========
+
+<RootShell>:
+    orientation: "vertical"
+
+    # —— top app bar ——
+    BoxLayout:
+        size_hint_y: None
+        height: dp(88)
+        padding: [dp(18), dp(14), dp(18), dp(14)]
+        spacing: dp(14)
+        canvas.before:
+            Color:
+                rgba: C_SURFACE_SOLID
+            Rectangle:
+                pos: self.pos
+                size: self.size
+            # شريط تمييز علوي متدرج المظهر
+            Color:
+                rgba: C_ACCENT
+            Rectangle:
+                pos: self.x, self.top - dp(2.5)
+                size: self.width, dp(2.5)
+            Color:
+                rgba: 0.18, 0.86, 0.62, 0.14
+            Rectangle:
+                pos: self.x, self.top - dp(12)
+                size: self.width, dp(10)
+            Color:
+                rgba: C_BORDER_SOFT
+            Line:
+                points: [self.x, self.y, self.right, self.y]
+                width: 1
+
+        # شعار دائري أكبر
+        Label:
+            size_hint: None, None
+            size: dp(52), dp(52)
+            pos_hint: {"center_y": 0.5}
+            text: "⚽"
+            font_size: "24sp"
+            halign: "center"
+            valign: "middle"
+            text_size: self.size
+            canvas.before:
+                Color:
+                    rgba: C_ACCENT_SOFT
+                Ellipse:
+                    pos: self.pos
+                    size: self.size
+                Color:
+                    rgba: C_ACCENT
+                Line:
+                    circle: (self.center_x, self.center_y, dp(24))
+                    width: 1.4
+
+        BoxLayout:
+            orientation: "vertical"
+            spacing: dp(5)
+            pos_hint: {"center_y": 0.5}
+            Label:
+                text: "Football Predictor"
+                font_size: "24sp"
+                bold: True
+                color: C_TEXT
+                halign: "left"
+                valign: "bottom"
+                text_size: self.size
+                size_hint_y: None
+                height: dp(32)
+            Label:
+                text: "Form  ·  Attack/Defense  ·  H2H"
+                font_size: "13sp"
+                color: C_MUTED
+                halign: "left"
+                valign: "top"
+                text_size: self.size
+                size_hint_y: None
+                height: dp(20)
+
+    ScreenManager:
+        id: sm
+        transition: FadeTransition(duration=0.12)
+
+        PredictScreen:
+            name: "predict"
+        ScheduleScreen:
+            name: "schedule"
+        TeamsScreen:
+            name: "teams"
+        StatusScreen:
+            name: "status"
+
+    # —— bottom nav ——
+    BoxLayout:
+        size_hint_y: None
+        height: dp(72)
+        padding: [dp(10), dp(8), dp(10), dp(10)]
+        spacing: dp(6)
+        canvas.before:
+            Color:
+                rgba: C_SURFACE_SOLID
+            Rectangle:
+                pos: self.pos
+                size: self.size
+            Color:
+                rgba: 0, 0, 0, 0.25
+            Rectangle:
+                pos: self.x, self.top - dp(6)
+                size: self.width, dp(6)
+            Color:
+                rgba: C_BORDER_SOFT
+            Line:
+                points: [self.x, self.top, self.right, self.top]
+                width: 1
+
+        NavItem:
+            icon: "🎯"
+            label: "Predict"
+            active: root.current_tab == "predict"
+            on_release: root.switch_tab("predict")
+        NavItem:
+            icon: "📅"
+            label: "Schedule"
+            active: root.current_tab == "schedule"
+            on_release: root.switch_tab("schedule")
+        NavItem:
+            icon: "🛡"
+            label: "Teams"
+            active: root.current_tab == "teams"
+            on_release: root.switch_tab("teams")
+        NavItem:
+            icon: "⚙"
+            label: "Status"
+            active: root.current_tab == "status"
+            on_release: root.switch_tab("status")
+
+
+# ========== Predict ==========
+
+<PredictScreen>:
+    BoxLayout:
+        orientation: "vertical"
+        padding: [dp(16), dp(14), dp(16), dp(10)]
+        spacing: dp(12)
+
+        ScrollView:
+            bar_width: dp(3)
+            bar_color: C_ACCENT_DIM
+            do_scroll_x: False
+            scroll_type: ["bars", "content"]
+
+            BoxLayout:
+                orientation: "vertical"
+                size_hint_y: None
+                height: self.minimum_height
+                spacing: dp(16)
+                padding: [0, 0, 0, dp(16)]
+
+                # —— بطاقة إعداد المباراة ——
+                Card:
+                    spacing: dp(14)
+                    padding: dp(20)
+
+                    BoxLayout:
+                        size_hint_y: None
+                        height: dp(28)
+                        Label:
+                            text: "Match setup"
+                            font_size: "17sp"
+                            bold: True
+                            color: C_TEXT
+                            halign: "left"
+                            valign: "middle"
+                            text_size: self.size
+                        Label:
+                            size_hint_x: None
+                            width: dp(90)
+                            text: "LIVE DATA"
+                            font_size: "11sp"
+                            bold: True
+                            color: C_ACCENT
+                            halign: "center"
+                            valign: "middle"
+                            text_size: self.size
+                            canvas.before:
+                                Color:
+                                    rgba: C_ACCENT_SOFT
+                                RoundedRectangle:
+                                    pos: self.pos
+                                    size: self.size
+                                    radius: [dp(10),]
+
+                    FieldLabel:
+                        text: "Home team"
+                    BoxLayout:
+                        size_hint_y: None
+                        height: dp(54)
+                        spacing: dp(12)
+                        TeamAvatar:
+                            team_name: root.home_text
+                            avatar_size: dp(46)
+                            pos_hint: {"center_y": 0.5}
+                        TeamSpinner:
+                            id: home_spinner
+                            text: root.home_text
+                            values: root.spinner_values
+                            on_text: root.home_text = self.text
+
+                    # VS
+                    BoxLayout:
+                        size_hint_y: None
+                        height: dp(32)
+                        spacing: dp(12)
+                        Widget:
+                            canvas.before:
+                                Color:
+                                    rgba: C_BORDER_SOFT
+                                Rectangle:
+                                    pos: self.x, self.center_y
+                                    size: self.width, dp(1)
+                        VsPill:
+                            pos_hint: {"center_y": 0.5}
+                        Widget:
+                            canvas.before:
+                                Color:
+                                    rgba: C_BORDER_SOFT
+                                Rectangle:
+                                    pos: self.x, self.center_y
+                                    size: self.width, dp(1)
+
+                    FieldLabel:
+                        text: "Away team"
+                    BoxLayout:
+                        size_hint_y: None
+                        height: dp(54)
+                        spacing: dp(12)
+                        TeamAvatar:
+                            team_name: root.away_text
+                            avatar_size: dp(46)
+                            pos_hint: {"center_y": 0.5}
+                        TeamSpinner:
+                            id: away_spinner
+                            text: root.away_text
+                            values: root.spinner_values
+                            on_text: root.away_text = self.text
+
+                    BoxLayout:
+                        size_hint_y: None
+                        height: dp(44)
+                        spacing: dp(10)
+                        GhostButton:
+                            text: "⇄  Swap"
+                            size_hint_x: 0.34
+                            on_release: root.swap_teams()
+                        GhostButton:
+                            text: "Clear"
+                            size_hint_x: 0.28
+                            on_release: root.clear_inputs()
+                        GhostButton:
+                            text: "↻  Teams"
+                            size_hint_x: 0.38
+                            on_release: root.reload_teams()
+
+                    PredictButton:
+                        id: predict_btn
+                        text: "⚡  Predict"
+                        disabled: root.busy
+                        on_press: root._on_predict_press()
+                        on_release: root.on_predict()
+
+                # حالة
+Label:
+                    text: root.status_line
+                    size_hint_y: None
+                    height: dp(24) if root.status_line else 0
+                    opacity: 1 if root.status_line else 0
+                    font_size: "13sp"
+                    color: C_ACCENT if root.busy else C_MUTED
+                    halign: "center"
+                    text_size: self.size
+
+                # —— بطاقة النتيجة ——
+                Card:
+                    id: result_card
+                    opacity: 1 if root.has_result else 0.62
+                    spacing: dp(14)
+                    padding: [dp(20), dp(20), dp(20), dp(20)]
+
+                    Label:
+                        text: "Prediction result"
+                        size_hint_y: None
+                        height: dp(22)
+                        font_size: "13sp"
+                        bold: True
+                        color: C_MUTED
+                        halign: "center"
+                        text_size: self.size
+
+                    # مواجهة
+                    BoxLayout:
+                        size_hint_y: None
+                        height: dp(96)
+                        spacing: dp(6)
+
+                        BoxLayout:
+                            orientation: "vertical"
+                            size_hint_x: 0.38
+                            spacing: dp(6)
+                            TeamAvatar:
+                                team_name: root.result_home
+                                avatar_size: dp(58)
+                                pos_hint: {"center_x": 0.5}
+                            Label:
+                                text: root.result_home_short
+                                size_hint_y: None
+                                height: dp(20)
+                                font_size: "13sp"
+                                bold: True
+                                color: C_TEXT
+                                halign: "center"
+                                text_size: self.size
+                                shorten: True
+                                shorten_from: "right"
+
+                        BoxLayout:
+                            orientation: "vertical"
+                            size_hint_x: 0.24
+                            spacing: dp(8)
+                            Widget:
+                                size_hint_y: 0.25
+                            VsPill:
+                                pos_hint: {"center_x": 0.5}
+                            Label:
+                                text: root.score_text
+                                size_hint_y: None
+                                height: dp(24)
+                                font_size: "16sp"
+                                bold: True
+                                color: C_TEXT
+                                halign: "center"
+                                text_size: self.size
+                            Widget:
+                                size_hint_y: 0.2
+
+                        BoxLayout:
+                            orientation: "vertical"
+                            size_hint_x: 0.38
+                            spacing: dp(6)
+                            TeamAvatar:
+                                team_name: root.result_away
+                                avatar_size: dp(58)
+                                pos_hint: {"center_x": 0.5}
+                            Label:
+                                text: root.result_away_short
+                                size_hint_y: None
+                                height: dp(20)
+                                font_size: "13sp"
+                                bold: True
+                                color: C_TEXT
+                                halign: "center"
+                                text_size: self.size
+                                shorten: True
+                                shorten_from: "right"
+
+                    Label:
+                        text: root.match_title
+                        size_hint_y: None
+                        height: dp(20)
+                        font_size: "12sp"
+                        color: C_HINT
+                        halign: "center"
+                        text_size: self.size
+                        shorten: True
+                        shorten_from: "center"
+
+                    ResultBadge:
+                        text: root.result_badge
+                        badge_color: root.badge_color
+
+                    Label:
+                        text: root.confidence_text
+                        size_hint_y: None
+                        height: dp(22)
+                        font_size: "13sp"
+                        color: C_MUTED
+                        halign: "center"
+                        text_size: self.size
+
+                    Widget:
+                        size_hint_y: None
+                        height: dp(4)
+                        canvas.before:
+                            Color:
+                                rgba: C_BORDER_SOFT
+                            Rectangle:
+                                pos: self.x + dp(8), self.center_y
+                                size: self.width - dp(16), dp(1)
+
+                    SectionTitle:
+                        text: "Probabilities"
+
+                    ProbStack:
+                        id: prob_stack
+                        p_home: root.prob_home
+                        p_draw: root.prob_draw
+                        p_away: root.prob_away
+                        home_txt: root.prob_home_txt
+                        draw_txt: root.prob_draw_txt
+                        away_txt: root.prob_away_txt
+
+                    ProbBar:
+                        id: bar_home
+                        side_label: "🟢  Home win"
+                        bar_color: C_WIN
+                        value: root.prob_home
+                        pct_text: root.prob_home_txt
+                    ProbBar:
+                        id: bar_draw
+                        side_label: "🟡  Draw"
+                        bar_color: C_DRAW
+                        value: root.prob_draw
+                        pct_text: root.prob_draw_txt
+                    ProbBar:
+                        id: bar_away
+                        side_label: "🔴  Away win"
+                        bar_color: C_LOSS
+                        value: root.prob_away
+                        pct_text: root.prob_away_txt
+
+                    Widget:
+                        size_hint_y: None
+                        height: dp(2)
+
+                    SectionTitle:
+                        text: "Details"
+                    Label:
+                        text: root.detail_text
+                        size_hint_y: None
+                        height: max(self.texture_size[1], dp(56))
+                        text_size: self.width, None
+                        font_size: "13sp"
+                        color: C_MUTED
+                        halign: "left"
+                        valign: "top"
+                        line_height: 1.45
+
+                    SectionTitle:
+                        text: "Reason"
+                    Label:
+                        text: root.reason_text
+                        size_hint_y: None
+                        height: max(self.texture_size[1], dp(36))
+                        text_size: self.width, None
+                        font_size: "14sp"
+                        color: C_TEXT
+                        halign: "left"
+                        valign: "top"
+                        line_height: 1.4
+                        padding: [dp(14), dp(12)]
+                        canvas.before:
+                            Color:
+                                rgba: C_CARD_ALT
+                            RoundedRectangle:
+                                pos: self.pos
+                                size: self.size
+                                radius: [dp(14),]
+
+
+# ========== Schedule ==========
+
+<ScheduleScreen>:
+    BoxLayout:
+        orientation: "vertical"
+        padding: [dp(16), dp(14), dp(16), dp(10)]
+        spacing: dp(12)
+
+        Card:
+            orientation: "horizontal"
+            size_hint_y: None
+            height: dp(72)
+            padding: [dp(16), dp(12), dp(12), dp(12)]
+            spacing: dp(12)
+
+            BoxLayout:
+                orientation: "vertical"
+                spacing: dp(4)
+                Label:
+                    text: "Upcoming matches"
+                    font_size: "17sp"
+                    bold: True
+                    color: C_TEXT
+                    halign: "left"
+                    valign: "bottom"
+                    text_size: self.size
+                Label:
+                    text: root.status_line
+                    font_size: "12sp"
+                    color: C_MUTED
+                    halign: "left"
+                    valign: "top"
+                    text_size: self.size
+                    shorten: True
+
+            PrimaryButton:
+                text: "Refresh"
+                size_hint_x: None
+                width: dp(108)
+                height: dp(46)
+                disabled: root.busy
+                on_release: root.load_schedule()
+
+        ScrollView:
+            bar_width: dp(3)
+            do_scroll_x: False
+            GridLayout:
+                id: list_box
+                cols: 1
+                size_hint_y: None
+                height: self.minimum_height
+                spacing: dp(14)
+                padding: [0, 0, 0, dp(14)]
+
+
+# ========== Teams ==========
+
+<TeamsScreen>:
+    BoxLayout:
+        orientation: "vertical"
+        padding: [dp(16), dp(14), dp(16), dp(10)]
+        spacing: dp(12)
+
+        Card:
+            spacing: dp(12)
+            Label:
+                text: "Known teams"
+                size_hint_y: None
+                height: dp(28)
+                font_size: "17sp"
+                bold: True
+                color: C_TEXT
+                halign: "left"
+                text_size: self.size
+            MTextInput:
+                id: search_input
+                hint_text: "🔍  Search teams..."
+                text: root.query
+                on_text: root.on_query(self.text)
+            BoxLayout:
+                size_hint_y: None
+                height: dp(44)
+                spacing: dp(10)
+                Label:
+                    text: root.count_text
+                    font_size: "13sp"
+                    color: C_MUTED
+                    halign: "left"
+                    valign: "middle"
+                    text_size: self.size
+                GhostButton:
+                    text: "Reload"
+                    size_hint_x: None
+                    width: dp(124)
+                    on_release: root.load_teams()
+
+        ScrollView:
+            bar_width: dp(3)
+            do_scroll_x: False
+            GridLayout:
+                id: teams_box
+                cols: 1
+                size_hint_y: None
+                height: self.minimum_height
+                spacing: dp(10)
+                padding: [0, 0, 0, dp(14)]
+
+
+# ========== Status ==========
+
+<StatusScreen>:
+    BoxLayout:
+        orientation: "vertical"
+        padding: [dp(16), dp(14), dp(16), dp(10)]
+        spacing: dp(12)
+
+        ScrollView:
+            bar_width: dp(3)
+            do_scroll_x: False
+            BoxLayout:
+                orientation: "vertical"
+                size_hint_y: None
+                height: self.minimum_height
+                spacing: dp(14)
+                padding: [0, 0, 0, dp(14)]
+
+                Card:
+                    Label:
+                        text: "Data status"
+                        size_hint_y: None
+                        height: dp(28)
+                        font_size: "17sp"
+                        bold: True
+                        color: C_TEXT
+                        halign: "left"
+                        text_size: self.size
+                    Label:
+                        text: root.summary_text
+                        size_hint_y: None
+                        height: max(self.texture_size[1], dp(80))
+                        text_size: self.width, None
+                        font_size: "14sp"
+                        color: C_MUTED
+                        halign: "left"
+                        valign: "top"
+                        line_height: 1.5
+
+                Card:
+                    spacing: dp(12)
+                    Label:
+                        text: "Update from API"
+                        size_hint_y: None
+                        height: dp(28)
+                        font_size: "17sp"
+                        bold: True
+                        color: C_TEXT
+                        halign: "left"
+                        text_size: self.size
+                    Label:
+                        text: "Fetches latest results and schedule from football-data.org.\nRequires FOOTBALL_DATA_API_TOKEN."
+                        size_hint_y: None
+                        height: max(self.texture_size[1], dp(48))
+                        text_size: self.width, None
+                        font_size: "13sp"
+                        color: C_MUTED
+                        halign: "left"
+                        valign: "top"
+                        line_height: 1.45
+                    PrimaryButton:
+                        text: "Update data now"
+                        disabled: root.busy
+                        on_release: root.do_update()
+                    Label:
+                        text: root.update_status
+                        size_hint_y: None
+                        height: max(self.texture_size[1], dp(24)) if root.update_status else 0
+                        text_size: self.width, None
+                        font_size: "13sp"
+                        color: C_ACCENT if root.busy else C_MUTED
+                        halign: "left"
+                        valign: "top"
+
+                Card:
+                    Label:
+                        text: "About"
+                        size_hint_y: None
+                        height: dp(28)
+                        font_size: "17sp"
+                        bold: True
+                        color: C_TEXT
+                        halign: "left"
+                        text_size: self.size
+                    Label:
+                        text: "Simple statistical model (form + attack/defense + H2H).\nFor learning and experimentation — not betting advice."
+                        size_hint_y: None
+                        height: max(self.texture_size[1], dp(48))
+                        text_size: self.width, None
+                        font_size: "13sp"
+                        color: C_MUTED
+                        halign: "left"
+                        valign: "top"
+                        line_height: 1.45
+
+                GhostButton:
+                    text: "Refresh status summary"
+                    on_release: root.refresh_summary()
