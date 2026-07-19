@@ -1,5 +1,4 @@
-# يبني APK (Buildozer + Kivy) ويرفعه كـ Artifact
-# يستخدم buildozer-action بتاغ ثابت v1.2.0 (بدل v1 العائم)
+# بناء APK يدوياً على ubuntu-latest — بدون Docker action خارجي
 name: Build Android APK
 
 on:
@@ -14,100 +13,79 @@ concurrency:
   group: build-apk-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  DEBIAN_FRONTEND: noninteractive
+  PIP_DISABLE_PIP_VERSION_CHECK: "1"
+  APP_ANDROID_ACCEPT_SDK_LICENSE: "1"
+
 jobs:
   build:
-    name: Buildozer APK
-    runs-on: ubuntu-22.04
+    name: Build APK
+    runs-on: ubuntu-latest
     timeout-minutes: 120
 
     steps:
-      - name: Checkout repository
+      # 1. Checkout
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Prepare app sources for Android
+      # 2. Python 3.11
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # 3. System dependencies for Buildozer
+      - name: Install system dependencies
+        run: |
+          set -euo pipefail
+          sudo apt-get update -y
+          sudo apt-get install -y --no-install-recommends \
+            git zip unzip wget curl rsync patch \
+            openjdk-17-jdk \
+            build-essential ccache cmake \
+            autoconf automake libtool pkg-config autoconf-archive \
+            zlib1g-dev libncurses-dev libffi-dev libssl-dev libltdl-dev \
+            libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev \
+            libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev \
+            gettext libgmp-dev libmpc-dev libmpfr-dev \
+            ffmpeg libgdbm-dev lbzip2
+          sudo apt-get install -y --no-install-recommends libtinfo5 libncurses5 || true
+          java -version
+          python --version
+
+      # 4. Buildozer + Cython via pip
+      - name: Install Buildozer and Cython
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip setuptools wheel
+          python -m pip install --upgrade "Cython>=0.29,<3.1" virtualenv
+          python -m pip install --upgrade buildozer
+          buildozer --version
+
+      # تجهيز نقطة الدخول (p4a يشغّل main.py — نستخدم واجهة Kivy من app.py)
+      - name: Prepare Android entrypoint
         run: |
           set -euo pipefail
           mkdir -p data models
           touch data/.gitkeep models/.gitkeep
-
-          # p4a يشغّل main.py فقط. في المستودع main.py = CLI،
-          # لذلك نحتفظ بنسخة CLI ونستبدل نقطة الدخول بواجهة Kivy.
           if [ -f main.py ]; then
             cp -f main.py main_cli.py
           fi
           cp -f app.py main.py
-          echo "Android entrypoint ready:"
           head -n 5 main.py
 
-      # اختياري: إن وُجد السر، اجلب بيانات حية لتُحزم داخل الـ APK
-      - name: Optional live data fetch
-        env:
-          FOOTBALL_DATA_API_TOKEN: ${{ secrets.FOOTBALL_DATA_API_TOKEN }}
+      # 5. buildozer android debug
+      - name: Build APK
         run: |
           set -euo pipefail
-          if [ -z "${FOOTBALL_DATA_API_TOKEN:-}" ]; then
-            echo "No FOOTBALL_DATA_API_TOKEN secret — building APK without fresh API data."
-            exit 0
-          fi
-          python3 -m pip install --upgrade pip
-          python3 -m pip install -r requirements.txt
-          python3 fetch_data.py --n 50 --next 20 || echo "fetch_data failed (non-fatal)"
+          buildozer -v android debug
 
-      # تاغ ثابت v1.2.0 (أحدث إصدار مستقر — 2025-06-05)
-      # ملاحظة: v1 العائم كان يشير لنسخة أقدم وقد يفشل بناء Docker
-      - name: Build APK with Buildozer
-        uses: ArtemSBulgakov/buildozer-action@v1.2.0
-        id: build
-        with:
-          workdir: .
-          command: buildozer -v android debug
-          buildozer_version: master
-
-      - name: Locate APK
-        id: apk
-        run: |
-          set -euo pipefail
-          echo "Searching for APK..."
-          # مخرجات الـ action أحيانًا تضع الاسم في steps.build.outputs.filename
-          if [ -n "${{ steps.build.outputs.filename }}" ]; then
-            echo "Action reported filename: ${{ steps.build.outputs.filename }}"
-          fi
-          mapfile -t APKS < <(find bin .buildozer -type f -name '*.apk' 2>/dev/null | sort -u || true)
-          if [ "${#APKS[@]}" -eq 0 ]; then
-            echo "No APK found under bin/ or .buildozer/"
-            find . -name '*.apk' -type f 2>/dev/null || true
-            ls -la bin 2>/dev/null || true
-            ls -la .buildozer 2>/dev/null || true
-            exit 1
-          fi
-          echo "Found:"
-          printf '  %s\n' "${APKS[@]}"
-          mkdir -p artifacts
-          PRIMARY="${APKS[0]}"
-          cp -f "$PRIMARY" "artifacts/football-predictor.apk"
-          for f in "${APKS[@]}"; do
-            cp -f "$f" "artifacts/$(basename "$f")"
-          done
-          echo "primary=artifacts/football-predictor.apk" >> "$GITHUB_OUTPUT"
-          ls -lah artifacts/
-
+      # 6. Upload APK artifact
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: football-predictor-apk
-          path: artifacts/*.apk
+          path: bin/*.apk
           if-no-files-found: error
           retention-days: 30
-
-      - name: Upload Buildozer logs (on failure)
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: buildozer-logs
-          path: |
-            .buildozer/**/*.log
-            .buildozer/**/build.log
-            buildozer.log
-            bin/**
-          if-no-files-found: ignore
-          retention-days: 7
