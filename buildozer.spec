@@ -24,7 +24,7 @@ source.include_patterns = src/*.py,data/*.csv,data/*.db
 
 # استبعاد ما لا يلزم داخل الحزمة
 # ملاحظة: لا تستبعد main.py — هو نقطة دخول Android (يُجهَّز من app.py في الـ workflow)
-source.exclude_dirs = tests,bin,venv,.venv,env,.git,.github,.buildozer,__pycache__,models,.idea,.vscode
+source.exclude_dirs = tests,bin,venv,.venv,env,.git,.github,.buildozer,__pycache__,models,.idea,.vscode,p4a-recipes
 source.exclude_patterns = *.pyc,*~,*.apk,*.aab,*.jks,.env,.env.*,*.md,fetch_data.py,predict.py,mobile_app.py,requirements*.txt,main_cli.py
 
 # ---- الاعتمادات (python-for-android recipes / pip) ----
@@ -67,6 +67,8 @@ android.debug_artifact = apk
 # فرع p4a — master أحدث الوصفات (numpy/pandas/kivy)
 p4a.branch = master
 p4a.bootstrap = sdl2
+# وصفة numpy محلية: patch لـ #include <unordered_map> (NDK libc++)
+p4a.local_recipes = %(source.dir)s/p4a-recipes
 
 [buildozer]
 
