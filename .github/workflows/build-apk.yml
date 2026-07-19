@@ -1,4 +1,5 @@
-# يبني APK عبر Buildozer على Ubuntu مباشرة (بدون third-party buildozer-action)
+# يبني APK (Buildozer + Kivy) ويرفعه كـ Artifact
+# يستخدم buildozer-action بتاغ ثابت v1.2.0 (بدل v1 العائم)
 name: Build Android APK
 
 on:
@@ -23,44 +24,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Set up Java 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "17"
-
-      - name: Install system dependencies
-        run: |
-          set -euo pipefail
-          sudo apt-get update -y
-          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-            git zip unzip tar wget curl ccache pkg-config autoconf automake \
-            libtool cmake patch gettext build-essential \
-            openjdk-17-jdk-headless \
-            python3-dev python3-pip python3-setuptools \
-            zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 \
-            libffi-dev libssl-dev libltdl-dev libjpeg-dev \
-            libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev \
-            libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev \
-            ffmpeg libgdbm-dev libbz2-dev libsqlite3-dev libreadline-dev \
-            liblzma-dev uuid-dev
-
-      - name: Install Buildozer, Cython, virtualenv
-        run: |
-          set -euo pipefail
-          python -m pip install --upgrade pip wheel setuptools
-          # Cython 0.29.x أكثر توافقًا مع وصفات p4a القديمة/المتوسطة
-          python -m pip install 'Cython>=0.29.33,<3' virtualenv
-          python -m pip install git+https://github.com/kivy/buildozer.git
-          buildozer --version
-          java -version
-          python --version
-
       - name: Prepare app sources for Android
         run: |
           set -euo pipefail
@@ -76,16 +39,7 @@ jobs:
           echo "Android entrypoint ready:"
           head -n 5 main.py
 
-      - name: Cache Buildozer global + project build
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.buildozer
-            .buildozer
-          key: buildozer-u22-${{ hashFiles('buildozer.spec', 'app.py', 'requirements-mobile.txt') }}
-          restore-keys: |
-            buildozer-u22-
-
+      # اختياري: إن وُجد السر، اجلب بيانات حية لتُحزم داخل الـ APK
       - name: Optional live data fetch
         env:
           FOOTBALL_DATA_API_TOKEN: ${{ secrets.FOOTBALL_DATA_API_TOKEN }}
@@ -95,20 +49,29 @@ jobs:
             echo "No FOOTBALL_DATA_API_TOKEN secret — building APK without fresh API data."
             exit 0
           fi
-          python -m pip install -r requirements.txt
-          python fetch_data.py --n 50 --next 20 || echo "fetch_data failed (non-fatal)"
+          python3 -m pip install --upgrade pip
+          python3 -m pip install -r requirements.txt
+          python3 fetch_data.py --n 50 --next 20 || echo "fetch_data failed (non-fatal)"
 
-      - name: Build debug APK with Buildozer
-        run: |
-          set -euo pipefail
-          # أول تشغيل ينزّل SDK/NDK/p4a تلقائيًا إلى ~/.buildozer
-          buildozer -v android debug
+      # تاغ ثابت v1.2.0 (أحدث إصدار مستقر — 2025-06-05)
+      # ملاحظة: v1 العائم كان يشير لنسخة أقدم وقد يفشل بناء Docker
+      - name: Build APK with Buildozer
+        uses: ArtemSBulgakov/buildozer-action@v1.2.0
+        id: build
+        with:
+          workdir: .
+          command: buildozer -v android debug
+          buildozer_version: master
 
       - name: Locate APK
         id: apk
         run: |
           set -euo pipefail
           echo "Searching for APK..."
+          # مخرجات الـ action أحيانًا تضع الاسم في steps.build.outputs.filename
+          if [ -n "${{ steps.build.outputs.filename }}" ]; then
+            echo "Action reported filename: ${{ steps.build.outputs.filename }}"
+          fi
           mapfile -t APKS < <(find bin .buildozer -type f -name '*.apk' 2>/dev/null | sort -u || true)
           if [ "${#APKS[@]}" -eq 0 ]; then
             echo "No APK found under bin/ or .buildozer/"
@@ -146,6 +109,5 @@ jobs:
             .buildozer/**/build.log
             buildozer.log
             bin/**
-            ~/.buildozer/android/platform/**/*.log
           if-no-files-found: ignore
           retention-days: 7
