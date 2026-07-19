@@ -37,10 +37,14 @@ source.exclude_patterns = *.pyc,*~,*.apk,*.aab,*.jks,.env,.env.*,*.md,fetch_data
 #   openssl + requests (+ deps) → HTTPS إن لزم
 #   numpy,pandas     → database/predictor
 #
-# لا تُدرج hostpython3 هنا — Buildozer/p4a يديرانه تلقائيًا
+# مهم: p4a master الافتراضي python 3.14.2 — pandas 2.3.0 يفشل compile عليه:
+#   ccalendar.pyx.c: error: member reference type 'int' is not a pointer
+#   (_PyUFuncObject_GET_ITEM_DATA / PyDataType_* implicit decl على cp314)
+# لذلك نثبت hostpython3+python3 على 3.11.13 (متوافق مع numpy/pandas 2.3 و Kivy 2.3).
+# يجب تطابق إصدار hostpython3 و python3 حرفيًا (فحص p4a).
 # scikit-learn / joblib: غير مستخدمين في منطق التوقع الحالي
 #
-requirements = python3,kivy==2.3.0,pillow,pyjnius,android,sqlite3,openssl,requests,urllib3,certifi,charset-normalizer,idna,numpy,pandas
+requirements = hostpython3==3.11.13,python3==3.11.13,kivy==2.3.0,pillow,pyjnius,android,sqlite3,openssl,requests,urllib3,certifi,charset-normalizer,idna,numpy,pandas
 
 # ---- واجهة العرض ----
 orientation = portrait
