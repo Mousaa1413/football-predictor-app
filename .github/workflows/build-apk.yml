@@ -48,9 +48,14 @@ jobs:
             zlib1g-dev libncurses-dev libffi-dev libssl-dev libltdl-dev \
             libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev \
             libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev \
-            gettext libgmp-dev libmpc-dev libmpfr-dev \
-            ffmpeg libgdbm-dev lbzip2
+            gettext autopoint libgmp-dev libmpc-dev libmpfr-dev \
+            ffmpeg libgdbm-dev lbzip2 xz-utils \
+            libbz2-dev liblzma-dev libsqlite3-dev
+          # libtinfo5/libncurses5 غير متوفرة على Ubuntu 24.04 (noble) — تجاهل الفشل
           sudo apt-get install -y --no-install-recommends libtinfo5 libncurses5 || true
+          # تحقق صريح: liblzma recipe يحتاج autopoint أثناء autoreconf
+          command -v autopoint
+          autopoint --version | head -n1
           java -version
           python --version
 
