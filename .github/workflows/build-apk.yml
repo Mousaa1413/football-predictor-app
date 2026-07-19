@@ -40,16 +40,18 @@ jobs:
         run: |
           set -euo pipefail
           sudo apt-get update -y
+          # ملاحظة: لا نثبت libsdl2-*-dev على الـ host.
+          # p4a يبني SDL2 داخل bootstrap؛ ووجود حزم SDL على النظام يجعل
+          # kivy 2.3.x setup.py يدمج -I/usr/include/* عبر pkg-config في
+          # أوامر NDK clang → خطأ __GNUC_PREREQ / sys/cdefs.h.
           sudo apt-get install -y --no-install-recommends \
             git zip unzip wget curl rsync patch \
             openjdk-17-jdk \
             build-essential ccache cmake \
             autoconf automake libtool pkg-config autoconf-archive \
             zlib1g-dev libncurses-dev libffi-dev libssl-dev libltdl-dev \
-            libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev \
-            libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev \
             gettext autopoint libgmp-dev libmpc-dev libmpfr-dev \
-            ffmpeg libgdbm-dev lbzip2 xz-utils \
+            libgdbm-dev lbzip2 xz-utils \
             libbz2-dev liblzma-dev libsqlite3-dev
           # libtinfo5/libncurses5 غير متوفرة على Ubuntu 24.04 (noble) — تجاهل الفشل
           sudo apt-get install -y --no-install-recommends libtinfo5 libncurses5 || true

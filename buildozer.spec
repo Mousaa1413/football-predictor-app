@@ -71,7 +71,10 @@ android.debug_artifact = apk
 # فرع p4a — master أحدث الوصفات (numpy/pandas/kivy)
 p4a.branch = master
 p4a.bootstrap = sdl2
-# وصفة numpy محلية: patch لـ #include <unordered_map> (NDK libc++)
+# وصفات محلية:
+#   numpy — patch لـ #include <unordered_map> (NDK libc++)
+#   kivy  — منع تسرّب cflags الخاصة بـ host SDL2 عبر pkg-config
+#           (خطأ __GNUC_PREREQ من /usr/include/.../sys/cdefs.h)
 p4a.local_recipes = %(source.dir)s/p4a-recipes
 
 [buildozer]
